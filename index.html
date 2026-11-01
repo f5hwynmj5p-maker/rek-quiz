@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Викторина РЕК | Праздничная версия</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #0038b8;
+            --dark-blue: #002070;
+            --gold: #d4af37;
+            --bg-color: #f0f4f8;
+            --card-bg: #ffffff;
+            --text-main: #1a202c;
+            --correct: #059669;
+            --wrong: #dc2626;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: var(--bg-color);
+            background-image: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
+
+        .screen {
+            display: none;
+            width: 100%;
+            max-width: 750px;
+            background: var(--card-bg);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            padding: 40px;
+            animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            border-top: 8px solid var(--primary-blue);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        /* Декоративный фон */
+        .screen::before {
+            content: '✡️';
+            position: absolute;
+            font-size: 200px;
+            opacity: 0.04;
+            top: -30px;
+            right: -30px;
+            transform: rotate(15deg);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .screen > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1, h2 {
+            color: var(--primary-blue);
+            text-align: center;
+            margin-bottom: 15px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        p {
+            text-align: center;
+            color: #4a5568;
+            margin-bottom: 25px;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        /* --- ЭКРАН 1: РЕГИСТРАЦИЯ --- */
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 18px;
+            border: 2px solid #cbd5e0;
+            border-radius: 14px;
+            font-size: 18px;
+            text-align: center;
+            transition: all 0.3s;
+            background: #f8fafc;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 4px rgba(0, 56, 184, 0.15);
+            background: white;
+        }
+
+        .btn {
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 18px;
+            font-size: 18px;
+            font-weight: 700;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            width: 100%;
+            display: block;
+            box-shadow: 0 4px 6px rgba(0, 56, 184, 0.2);
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+        }
+
+        .btn:hover {
+            background: var(--dark-blue);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0, 56, 184, 0.3);
+        }
+        
+        .btn-gold {
+            background: linear-gradient(135deg, #f1c40f, #d4af37);
+            color: #1a202c;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+        }
+        
+        .btn-gold:hover {
+            background: linear-gradient(135deg, #d4af37, #b5952f);
+            box-shadow: 0 8px 20px rgba(212, 175, 55, 0.6);
+        }
+
+        /* --- ЭКРАН 2: ВИКТОРИНА --- */
+        .header-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            font-weight: 700;
+            color: var(--primary-blue);
+            font-size: 15px;
+        }
+
+        .timer-container {
+            width: 100%;
+            height: 12px;
+            background: #e2e8f0;
+            border-radius: 6px;
+            margin-bottom: 30px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .timer-bar {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, #4facfe 0%, #0038b8 100%);
+            transition: width 1s linear;
+            border-radius: 6px;
+        }
+
+        .timer-bar.warning {
+            background: linear-gradient(90deg, #ff416c 0%, #ff4b2b 100%);
+        }
+
+        .question-text {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 25px;
+            line-height: 1.4;
+            color: #1a202c;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .option {
+            background: #ffffff;
+            border: 2px solid #e2e8f0;
+            padding: 18px 20px;
+            border-radius: 14px;
+            font-size: 17px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+            font-weight: 600;
+            color: #2d3748;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .option:hover:not(.disabled) {
+            border-color: var(--primary-blue);
+            background: #f0f7ff;
+            transform: translateX(4px);
+        }
+
+        .option.correct {
+            background: #d1fae5;
+            border-color: var(--correct);
+            color: #065f46;
+            box-shadow: 0 0 15px rgba(5, 150, 105, 0.2);
+        }
+
+        .option.wrong {
+            background: #fee2e2;
+            border-color: var(--wrong);
+            color: #991b1b;
+            box-shadow: 0 0 15px rgba(220, 38, 38, 0.2);
+        }
+
+        .option.disabled {
+            cursor: default;
+            opacity: 0.9;
+            transform: none !important;
+        }
+
+        .feedback-box {
+            display: none;
+            padding: 20px;
+            border-radius: 14px;
+            margin-bottom: 20px;
+            font-size: 16px;
+            line-height: 1.6;
+            animation: slideUp 0.3s ease;
+        }
+
+        .feedback-box.correct {
+            background: #ecfdf5;
+            border-left: 6px solid var(--correct);
+            color: #065f46;
+        }
+
+        .feedback-box.wrong {
+            background: #fef2f2;
+            border-left: 6px solid var(--wrong);
+            color: #991b1b;
+        }
+
+        /* --- ЭКРАН 3: РЕЗУЛЬТАТЫ --- */
+        .result-score {
+            font-size: 70px;
+            font-weight: 800;
+            color: var(--primary-blue);
+            text-align: center;
+            margin: 10px 0;
+            text-shadow: 0 4px 10px rgba(0, 56, 184, 0.2);
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .review-section {
+            max-height: 250px;
+            overflow-y: auto;
+            margin: 20px 0;
+            padding-right: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            background: #fafbfc;
+        }
+
+        .review-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 14px;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+        
+        .review-item:last-child {
+            border-bottom: none;
+        }
+
+        .review-icon {
+            font-size: 18px;
+            margin-top: 2px;
+        }
+
+        .review-text {
+            flex: 1;
+        }
+        
+        .review-text strong {
+            display: block;
+            margin-bottom: 4px;
+            color: #1a202c;
+            font-size: 14px;
+        }
+
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            font-size: 14px;
+        }
+
+        .leaderboard-table th {
+            background: var(--primary-blue);
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .leaderboard-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+            font-weight: 600;
+        }
+
+        .leaderboard-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .leaderboard-table tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        .actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .actions .btn {
+            flex: 1;
+        }
+
+        /* Скроллбар */
+        .review-section::-webkit-scrollbar { width: 6px; }
+        .review-section::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        .review-section::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 10px; }
+
+        /* КОНФЕТТИ */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            z-index: 9999;
+            pointer-events: none;
+            animation: fall 3s linear forwards;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ЭКРАН 1: Ввод имени -->
+    <div id="screen-start" class="screen active">
+        <h1>🕎 Викторина РЕК</h1>
+        <p>Добро пожаловать на викторину, посвященную <strong>Российскому еврейскому конгрессу</strong>.<br>Проверьте свои знания и попадите в таблицу лидеров!</p>
+        
+        <div class="input-group">
+            <input type="text" id="playerName" placeholder="Введите ваше имя..." maxlength="20" autocomplete="off">
+            <button class="btn" onclick="askToStart()">Продолжить</button>
+        </div>
+    </div>
+
+    <!-- ЭКРАН 2: Подтверждение старта -->
+    <div id="screen-confirm" class="screen">
+        <h2>Шалом, <span id="confirmName"></span>! ✡️</h2>
+        <p>Хотите начать викторину?</p>
+        <p style="font-size: 15px; color: #718096; background: #edf2f7; padding: 12px; border-radius: 10px;">
+            Вам предстоит ответить на 15 вопросов.<br>На каждый вопрос дается ровно <strong>25 секунд</strong>.
+        </p>
+        <div class="actions">
+            <button class="btn btn-gold" onclick="startQuiz()">🚀 Начать викторину!</button>
+        </div>
+    </div>
+
+    <!-- ЭКРАН 3: Сама викторина -->
+    <div id="screen-quiz" class="screen">
+        <div class="header-info">
+            <span id="questionCounter">Вопрос 1 из 15</span>
+            <span id="timerText" style="color: var(--primary-blue);">25 сек</span>
+        </div>
+        
+        <div class="timer-container">
+            <div class="timer-bar" id="timerBar"></div>
+        </div>
+
+        <div class="question-text" id="questionText">Текст вопроса...</div>
+        
+        <div class="options" id="optionsContainer"></div>
+
+        <div class="feedback-box" id="feedbackBox"></div>
+        
+        <button class="btn" id="nextBtn" style="display: none;" onclick="handleNextButton()">Следующий вопрос →</button>
+    </div>
+
+    <!-- ЭКРАН 4: Результат -->
+    <div id="screen-result" class="screen">
+        <h2>Викторина завершена! 🏁</h2>
+        <div class="result-score" id="finalScore">0 / 15</div>
+        <p id="resultMessage">Ваш результат...</p>
+        
+        <h3 style="font-size: 16px; margin-bottom: 10px; color: var(--primary-blue);">📝 Ваши ответы:</h3>
+        <div class="review-section" id="reviewSection"></div>
+
+        <h3 style="font-size: 16px; margin-bottom: 10px; color: var(--primary-blue); margin-top: 20px;">🏆 Таблица лидеров:</h3>
+        <table class="leaderboard-table">
+            <thead>
+                <tr>
+                    <th>Место</th>
+                    <th>Имя</th>
+                    <th>Баллы</th>
+                    <th>Время</th>
+                </tr>
+            </thead>
+            <tbody id="leaderboardBody"></tbody>
+        </table>
+
+        <div class="actions" style="margin-top: 30px;">
+            <button class="btn" style="background: #e2e8f0; color: #1a202c;" onclick="location.reload()">🔄 Пройти заново</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            { q: "В каком году был создан Российский еврейский конгресс (РЕК)?", options: ["1996 год", "1997 год", "2000 год", "2005 год"], correct: 0, exp: "РЕК был создан в 1996 году инициативной группой крупных еврейских бизнесменов для поддержки возрождения еврейской жизни в России." },
+            { q: "Кто стал новым президентом РЕК в 2025 году?", options: ["Михаил Фридман", "Александр Генцис", "Виктор Вексельберг", "Герман Хан"], correct: 1, exp: "В мае 2025 года президентом РЕК избран Александр Генцис. Юрий Каннер стал почётным президентом." },
+            { q: "Кто возглавлял РЕК с 2009 по 2025 год?", options: ["Владимир Гусинский", "Евгений Сатановский", "Юрий Каннер", "Вячеслав Кантор"], correct: 2, exp: "Юрий Каннер был президентом РЕК с 2009 по 2025 год. Его главным достижением считают возвращение доверия к еврейской благотворительности в России." },
+            { q: "Кто из бизнесменов НЕ упоминается в списках попечителей РЕК?", options: ["Михаил Фридман", "Герман Хан", "Год Нисанов", "Олег Тиньков"], correct: 3, exp: "В руководстве РЕК упоминаются Фридман, Хан, Нисанов, Вексельберг. Олег Тиньков в этих списках не значится." },
+            { q: "Какая школа стала «полноценной средней школой» при поддержке РЕК?", options: ["Школа «Маалит»", "Школа «Дор Ревии»", "Школа «Тикун»", "Школа «Шалом»"], correct: 0, exp: "Это школа «Маалит»! В отчёте РЕК отметили: «Теперь это полноценная средняя школа»." },
+            { q: "Какая программа РЕК устанавливает памятники жертвам Холокоста?", options: ["«Неделя памяти»", "«Вернуть достоинство»", "«Тикун Лаб»", "«Компаньоны»"], correct: 1, exp: "Программа «Вернуть достоинство» устанавливает мемориалы на местах массовых захоронений жертв Холокоста." },
+            { q: "Главный источник финансирования программ РЕК?", options: ["Госбюджет РФ", "Пожертвования бизнесменов", "Международные гранты", "Продажа билетов"], correct: 1, exp: "РЕК существует за счет пожертвований предпринимателей и филантропов, объединяя их для помощи нуждающимся." },
+            { q: "Как расшифровывается аббревиатура РЕК?", options: ["Российский еврейский комитет", "Региональный еврейский конгресс", "Российский еврейский конгресс", "Русско-еврейская коалиция"], correct: 2, exp: "РЕК — это Российский еврейский конгресс, крупнейшая светская еврейская организация России." },
+            { q: "На кого направлена помощь РЕК в первую очередь?", options: ["На строительство синагог", "На пожилых, детей и инвалидов", "На политику", "На издание книг"], correct: 1, exp: "Основной фокус — социальная помощь: пожилые (программа «Компаньоны»), дети из незащищенных семей и люди с инвалидностью." },
+            { q: "Какое ежегодное мероприятие проводит РЕК в память о Холокосте?", options: ["Фестиваль «Шалом»", "Неделя памяти жертв Холокоста", "Марафон «Тикун Олам»", "Конференция по иудаике"], correct: 1, exp: "«Неделя памяти жертв Холокоста» — масштабная ежегодная акция при поддержке РЕК." },
+            { q: "Какой бизнесмен входит в Попечительский совет РЕК?", options: ["Илон Маск", "Билл Гейтс", "Виктор Вексельберг", "Уоррен Баффет"], correct: 2, exp: "Виктор Вексельберг — известный предприниматель и меценат, поддерживающий РЕК." },
+            { q: "В какой международный союз входит РЕК?", options: ["Всемирный еврейский конгресс", "ООН", "Сохнут", "Красный Крест"], correct: 0, exp: "С 2018 года РЕК представляет интересы еврейских организаций РФ во Всемирном еврейском конгрессе." },
+            { q: "Что означает программа РЕК «Компаньоны»?", options: ["Помощь животным", "Помощь пожилым людям", "Детские лагеря", "Бизнес-курсы"], correct: 1, exp: "«Компаньоны» помогают пожилым и людям с инвалидностью, подбирая помощника для бытовых вопросов." },
+            { q: "Сколько лет исполняется РЕК с года основания?", options: ["10 лет", "15 лет", "20 лет", "Более 25 лет"], correct: 3, exp: "Организация основана в 1996 году, поэтому она существует уже более 25 лет." },
+            { q: "Кто из предпринимателей также поддерживает РЕК?", options: ["Павел Дуров", "Михаил Фридман", "Алексей Навальный", "Роман Абрамович"], correct: 1, exp: "Михаил Фридман — один из основателей РЕК, поддерживающий еврейские общинные проекты." }
+        ];
+
+        let currentQ = 0;
+        let score = 0;
+        let playerName = "";
+        let startTime = 0;
+        let timerInterval = null;
+        let timeLeft = 25;
+        let isAnswered = false;
+        let userAnswers = [];
+
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        function askToStart() {
+            const nameInput = document.getElementById('playerName').value.trim();
+            if (!nameInput) {
+                alert("Пожалуйста, введите ваше имя!");
+                return;
+            }
+            playerName = nameInput;
+            document.getElementById('confirmName').innerText = playerName;
+            showScreen('screen-confirm');
+        }
+
+        function startQuiz() {
+            showScreen('screen-quiz');
+            currentQ = 0;
+            score = 0;
+            userAnswers = [];
+            startTime = Date.now();
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            isAnswered = false;
+            const q = questions[currentQ];
+            
+            document.getElementById('questionCounter').innerText = `Вопрос ${currentQ + 1} из 15`;
+            document.getElementById('questionText').innerText = q.q;
+            
+            const optionsDiv = document.getElementById('optionsContainer');
+            optionsDiv.innerHTML = '';
+            
+            q.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option';
+                btn.innerText = opt;
+                btn.onclick = () => selectAnswer(index, btn);
+                optionsDiv.appendChild(btn);
+            });
+
+            const feedback = document.getElementById('feedbackBox');
+            feedback.style.display = 'none';
+            feedback.className = 'feedback-box';
+            document.getElementById('nextBtn').style.display = 'none';
+
+            startTimer();
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            timeLeft = 25; // 25 секунд
+            const timerBar = document.getElementById('timerBar');
+            const timerText = document.getElementById('timerText');
+            
+            timerBar.style.width = '100%';
+            timerBar.classList.remove('warning');
+            timerText.innerText = '25 сек';
+            timerText.style.color = 'var(--primary-blue)';
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerText.innerText = `${timeLeft} сек`;
+                timerBar.style.width = `${(timeLeft / 25) * 100}%`;
+
+                if (timeLeft <= 5) {
+                    timerBar.classList.add('warning');
+                    timerText.style.color = 'var(--wrong)';
+                }
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    if (!isAnswered) {
+                        handleTimeout();
+                    }
+                }
+            }, 1000);
+        }
+
+        function selectAnswer(selectedIndex, btnElement) {
+            if (isAnswered) return;
+            isAnswered = true;
+            clearInterval(timerInterval);
+
+            const q = questions[currentQ];
+            const allOptions = document.querySelectorAll('.option');
+            allOptions.forEach(opt => opt.classList.add('disabled'));
+
+            const feedback = document.getElementById('feedbackBox');
+            const isCorrect = selectedIndex === q.correct;
+
+            userAnswers.push({
+                question: q.q,
+                isCorrect: isCorrect,
+                userAnswer: q.options[selectedIndex],
+                correctAnswer: q.options[q.correct]
+            });
+
+            if (isCorrect) {
+                score++;
+                btnElement.classList.add('correct');
+                feedback.innerHTML = `<strong>✅ Верно!</strong><br>${q.exp}`;
+                feedback.classList.add('correct');
+            } else {
+                btnElement.classList.add('wrong');
+                allOptions[q.correct].classList.add('correct');
+                feedback.innerHTML = `<strong>❌ Неверно.</strong> Правильный ответ: <strong>${q.options[q.correct]}</strong>.<br>${q.exp}`;
+                feedback.classList.add('wrong');
+            }
+
+            feedback.style.display = 'block';
+            showNextButton();
+        }
+
+        function handleTimeout() {
+            isAnswered = true;
+            const q = questions[currentQ];
+            const allOptions = document.querySelectorAll('.option');
+            allOptions.forEach(opt => opt.classList.add('disabled'));
+            allOptions[q.correct].classList.add('correct');
+
+            userAnswers.push({
+                question: q.q,
+                isCorrect: false,
+                userAnswer: "Время вышло",
+                correctAnswer: q.options[q.correct]
+            });
+
+            const feedback = document.getElementById('feedbackBox');
+            feedback.innerHTML = `<strong>⏰ Время вышло!</strong> Правильный ответ: <strong>${q.options[q.correct]}</strong>.<br>${q.exp}`;
+            feedback.classList.add('wrong');
+            feedback.style.display = 'block';
+            
+            showNextButton();
+        }
+
+        function showNextButton() {
+            const nextBtn = document.getElementById('nextBtn');
+            nextBtn.style.display = 'block';
+            if (currentQ === questions.length - 1) {
+                nextBtn.innerText = 'Показать результат 🏁';
+            } else {
+                nextBtn.innerText = 'Следующий вопрос →';
+            }
+        }
+
+        // ИСПРАВЛЕННАЯ ФУНКЦИЯ ПЕРЕХОДА
+        function handleNextButton() {
+            if (currentQ < questions.length - 1) {
+                currentQ++;
+                loadQuestion();
+            } else {
+                // Прямой вызов финала без задержек
+                finishQuiz();
+            }
+        }
+
+        function finishQuiz() {
+            clearInterval(timerInterval);
+            const timeSpent = (Date.now() - startTime) / 1000;
+            
+            document.getElementById('finalScore').innerText = `${score} / 15`;
+            
+            let msg = "";
+            if (score === 15) msg = "Блестяще! Вы настоящий знаток РЕК! ✡️";
+            else if (score >= 10) msg = "Отличный результат! Вы хорошо знаете историю Конгресса.";
+            else msg = "Спасибо за игру! Вы можете узнать больше о РЕК на их официальном сайте.";
+
+            document.getElementById('resultMessage').innerText = msg;
+
+            // Разбор ответов
+            const reviewSection = document.getElementById('reviewSection');
+            reviewSection.innerHTML = '';
+
+            userAnswers.forEach((answer, index) => {
+                const item = document.createElement('div');
+                item.className = 'review-item';
+                const icon = answer.isCorrect ? '✅' : '❌';
+                const iconColor = answer.isCorrect ? 'var(--correct)' : 'var(--wrong)';
+                
+                item.innerHTML = `
+                    <div class="review-icon" style="color: ${iconColor};">${icon}</div>
+                    <div class="review-text">
+                        <strong>Вопрос ${index + 1}: ${answer.question}</strong>
+                        <span style="color: ${iconColor}; font-weight: 600;">Ваш ответ: ${answer.userAnswer}</span>
+                        ${!answer.isCorrect ? `<br><span style="color: var(--correct); font-weight: 600;">Правильный ответ: ${answer.correctAnswer}</span>` : ''}
+                    </div>
+                `;
+                reviewSection.appendChild(item);
+            });
+
+            saveScore(playerName, score, timeSpent);
+            renderLeaderboard();
+            
+            // Запуск конфетти
+            triggerConfetti();
+
+            showScreen('screen-result');
+        }
+
+        function saveScore(name, score, time) {
+            let leaderboard = JSON.parse(localStorage.getItem('rek_leaderboard')) || [];
+            leaderboard.push({ name: name, score: score, time: time });
+            leaderboard.sort((a, b) => {
+                if (b.score !== a.score) return b.score - a.score;
+                return a.time - b.time;
+            });
+            leaderboard = leaderboard.slice(0, 10);
+            localStorage.setItem('rek_leaderboard', JSON.stringify(leaderboard));
+        }
+
+        function renderLeaderboard() {
+            const leaderboard = JSON.parse(localStorage.getItem('rek_leaderboard')) || [];
+            const tbody = document.getElementById('leaderboardBody');
+            tbody.innerHTML = '';
+
+            if (leaderboard.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Пока никто не играл.</td></tr>';
+            } else {
+                leaderboard.forEach((entry, index) => {
+                    const tr = document.createElement('tr');
+                    let medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : (index + 1);
+                    const isCurrentPlayer = entry.name === playerName && entry.score === score;
+                    const bgStyle = isCurrentPlayer ? 'background-color: #fef3c7;' : '';
+
+                    tr.innerHTML = `
+                        <td style="${bgStyle}">${medal}</td>
+                        <td style="${bgStyle}">${entry.name}</td>
+                        <td style="color: var(--primary-blue); ${bgStyle}">${entry.score} / 15</td>
+                        <td style="${bgStyle}">${entry.time.toFixed(1)} сек.</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+        }
+
+        // --- ЭФФЕКТ КОНФЕТТИ ---
+        function triggerConfetti() {
+            const colors = ['#0038b8', '#d4af37', '#ffffff', '#4facfe'];
+            for (let i = 0; i < 80; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.width = Math.random() * 8 + 6 + 'px';
+                confetti.style.height = confetti.style.width;
+                confetti.style.animationDuration = Math.random() * 2 + 2 + 's';
+                confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                
+                // Делаем конфетти разной формы (круглые и квадратные)
+                if (Math.random() > 0.5) {
+                    confetti.style.borderRadius = '50%';
+                }
+                
+                document.body.appendChild(confetti);
+
+                // Удаляем через 4 секунды, чтобы не засорять страницу
+                setTimeout(() => {
+                    confetti.remove();
+                }, 4000);
+            }
+        }
+    </script>
+</body>
+</html>
